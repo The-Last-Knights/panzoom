@@ -1,6 +1,7 @@
 import './demo.css'
 import './global-panzoom'
 
+import ContainCover from './examples/ContainCover'
 import ContainInside from './examples/ContainInside'
 import ContainOutside from './examples/ContainOutside'
 import DisabledYAxis from './examples/DisabledYAxis'
@@ -32,6 +33,7 @@ function Demos() {
       <SVG />
       <ContainInside />
       <ContainOutside />
+      <ContainCover />
       <Exclude />
       <DisabledYAxis />
       <Rotate />

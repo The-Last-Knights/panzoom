@@ -151,8 +151,8 @@ export interface MiscOptions {
 
 export interface PanOnlyOptions {
   /**
-   * Contain the panzoom element either
-   * inside or outside the parent.
+   * Constrain the panzoom element either
+   * to the parent.
    * Inside: The panzoom element is smaller
    *   than its parent and cannot be panned
    *   to the outside.
@@ -160,10 +160,13 @@ export interface PanOnlyOptions {
    *   than its parent and cannot be panned
    *   to the inside. In other words, no
    *   empty space around the element will be shown.
+   * Cover: Similar to 'outside', but allow empty space
+   *    in 1 direction. The element must always be touching
+   *    the parent edges in either horizontal or vertical direction.
    *
    * **Note**: the containment pan adjustment is not affected by the `disablePan` option.
    */
-  contain?: 'inside' | 'outside'
+    contain?: 'inside' | 'outside' | 'cover'
   /** The cursor style to set on the panzoom element */
   cursor?: string
   /**
