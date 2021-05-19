@@ -23,4 +23,4 @@ jobs:
           git config user.email "<>"
           git add .
           git commit -m "fix: auto build"
-          git push origin master
+          git push origin main
