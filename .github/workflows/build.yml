@@ -15,7 +15,7 @@ jobs:
       - name: build
         run: |
           npm install
-          npm run prepare
+          npm run x-prepare
     
       - name: commit
         run: |
