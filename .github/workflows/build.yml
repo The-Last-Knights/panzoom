@@ -22,5 +22,5 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git add .
-          git commit -m "Auto-Build"
+          git commit -m "fix: auto build"
           git push origin master
