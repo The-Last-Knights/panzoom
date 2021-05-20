@@ -540,8 +540,7 @@ function Panzoom(elem, options) {
                 result.x = Math.max(Math.min(result.x, maxX), minX);
             }
             if (scaledHeight < dims.parent.height) {
-                result.y = (dims.parent.height / 2 - scaledHeight / 2 - dims.parent.padding.top - dims.parent.border.top + diffVertical) /
-                    toScale;
+                result.y = (diffVertical - dims.parent.padding.top) / toScale;
             }
             else {
                 var minY = (-(scaledHeight - dims.parent.height) -
