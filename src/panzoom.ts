@@ -244,8 +244,7 @@ function Panzoom(
           toScale
         const maxY = (diffVertical - dims.parent.padding.top) / toScale
         result.y = Math.max(Math.min(result.y, maxY), minY)
-        }
-    } else if (opts.contain === 'cover') {
+      } else if (opts.contain === 'cover') {
         const dims = getDimensions(elem)
         const realWidth = dims.elem.width / scale
         const realHeight = dims.elem.height / scale
@@ -255,36 +254,45 @@ function Panzoom(
         const diffVertical = (scaledHeight - realHeight) / 2
 
         if (scaledWidth < dims.parent.width) {
-            result.x = (dims.parent.width / 2 - scaledWidth / 2 - dims.parent.padding.left - dims.parent.border.left + diffHorizontal) /
-                toScale;
-        }
-        else {
-            const minX =
-                (-(scaledWidth - dims.parent.width) -
-                        dims.parent.padding.left -
-                        dims.parent.border.left -
-                        dims.parent.border.right +
-                        diffHorizontal) /
-                    toScale
-            const maxX = (diffHorizontal - dims.parent.padding.left) / toScale
-            result.x = Math.max(Math.min(result.x, maxX), minX)
+          result.x =
+            (dims.parent.width / 2 -
+              scaledWidth / 2 -
+              dims.parent.padding.left -
+              dims.parent.border.left +
+              diffHorizontal) /
+            toScale
+        } else {
+          const minX =
+            (-(scaledWidth - dims.parent.width) -
+              dims.parent.padding.left -
+              dims.parent.border.left -
+              dims.parent.border.right +
+              diffHorizontal) /
+            toScale
+          const maxX = (diffHorizontal - dims.parent.padding.left) / toScale
+          result.x = Math.max(Math.min(result.x, maxX), minX)
         }
 
         if (scaledHeight < dims.parent.height) {
-            result.y = (dims.parent.height / 2 - scaledHeight / 2 - dims.parent.padding.top - dims.parent.border.top + diffVertical) /
-                toScale;
+          result.y =
+            (dims.parent.height / 2 -
+              scaledHeight / 2 -
+              dims.parent.padding.top -
+              dims.parent.border.top +
+              diffVertical) /
+            toScale
+        } else {
+          const minY =
+            (-(scaledHeight - dims.parent.height) -
+              dims.parent.padding.top -
+              dims.parent.border.top -
+              dims.parent.border.bottom +
+              diffVertical) /
+            toScale
+          const maxY = (diffVertical - dims.parent.padding.top) / toScale
+          result.y = Math.max(Math.min(result.y, maxY), minY)
         }
-        else {
-            const minY =
-                (-(scaledHeight - dims.parent.height) -
-                        dims.parent.padding.top -
-                        dims.parent.border.top -
-                        dims.parent.border.bottom +
-                        diffVertical) /
-                    toScale
-            const maxY = (diffVertical - dims.parent.padding.top) / toScale
-            result.y = Math.max(Math.min(result.y, maxY), minY)
-        }
+      }
     }
 
     if (opts.roundPixels) {
@@ -310,17 +318,17 @@ function Panzoom(
       const elemWidth = dims.elem.width / scale
       const elemHeight = dims.elem.height / scale
       if (elemWidth > 1 && elemHeight > 1) {
-          const parentWidth = dims.parent.width - dims.parent.border.left - dims.parent.border.right
-          const parentHeight = dims.parent.height - dims.parent.border.top - dims.parent.border.bottom
-          const elemScaledWidth = parentWidth / elemWidth
-          const elemScaledHeight = parentHeight / elemHeight
-          if (options.contain === 'inside') {
-              maxScale = Math.min(maxScale, elemScaledWidth, elemScaledHeight)
-          } else if (options.contain === 'outside') {
-              minScale = Math.max(minScale, elemScaledWidth, elemScaledHeight)
-          } else if (options.contain === 'cover') {
-              minScale = Math.min(parentWidth / dims.elem.width, parentHeight / dims.elem.height)
-          }
+        const parentWidth = dims.parent.width - dims.parent.border.left - dims.parent.border.right
+        const parentHeight = dims.parent.height - dims.parent.border.top - dims.parent.border.bottom
+        const elemScaledWidth = parentWidth / elemWidth
+        const elemScaledHeight = parentHeight / elemHeight
+        if (options.contain === 'inside') {
+          maxScale = Math.min(maxScale, elemScaledWidth, elemScaledHeight)
+        } else if (options.contain === 'outside') {
+          minScale = Math.max(minScale, elemScaledWidth, elemScaledHeight)
+        } else if (options.contain === 'cover') {
+          minScale = Math.min(parentWidth / dims.elem.width, parentHeight / dims.elem.height)
+        }
       }
     }
 

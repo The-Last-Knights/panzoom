@@ -152,7 +152,7 @@ export interface PanOnlyOptions {
    *
    * **Note**: the containment pan adjustment is not affected by the `disablePan` option.
    */
-    contain?: 'inside' | 'outside' | 'cover'
+  contain?: 'inside' | 'outside' | 'cover'
   /** The cursor style to set on the panzoom element */
   cursor?: string
   /**
