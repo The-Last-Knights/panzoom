@@ -11,9 +11,13 @@ function write(filename, data) {
 const header = '\n---\n\n## Documentation'
 let data = read('../README.md').replace(new RegExp(header + '[^]+'), '') + header
 
-// Remove links that aren't links to source
 function removeLinks(data) {
-  return data.replace(/\[([^:]+)\]\(.*?\)/g, '$1')
+  const d = data.replace(/\[([^\]]+)\]\([^)]+\)/g, function (all, name) {
+    // Links to source have colons
+    // Leave those alone
+    return name.indexOf(':') > -1 ? all : name
+  })
+  return d
 }
 
 function addLinks(data) {
@@ -55,7 +59,7 @@ function getInterfaceContent(filename, customHeader) {
       .replace(/# Interface:\s*(.+)[^]+##\s*Properties/, customHeader ? customHeader : '## $1')
       .replace(/___/g, '')
       // Remove superfluous type declarations
-      .replace(/#### Type declaration:\n\n▸ .+/g, '')
+      .replace(/#### Type declaration\n\n▸ .+/g, '')
       // Remove double "Defined in"
       .replace(/(Defined in: .+)\n\nDefined in: .+/g, '$1')
   )
@@ -79,8 +83,11 @@ function addDefaults(data) {
 }
 
 const panzoomOptions =
-  '\n\n## `PanzoomOptions`\n\nIncludes `MiscOptions`, `PanOnlyOptions`, and `ZoomOnlyOptions`\n\n' +
-  getInterfaceContent('types.miscoptions.md') +
+  '\n\n## `PanzoomOptions`\n\nIncludes `MiscOptions`, `PanOptions`, and `ZoomOptions`\n\n' +
+  getInterfaceContent(
+    'types.miscoptions.md',
+    '## MiscOptions\n\nThese options can be passed to `Panzoom()`, as well as any pan or zoom function. One exception is `force`, which can only be passed to methods like `pan()` or `zoom()`, but not `Panzoom()` or `setOptions()` as it should not be set globally.'
+  ) +
   getInterfaceContent(
     'types.panonlyoptions.md',
     '## PanOptions (includes [MiscOptions](#MiscOptions))'
@@ -94,7 +101,7 @@ data += addDefaults(panzoomOptions)
 
 data += getInterfaceContent(
   'types.panzoomobject.md',
-  '## PanzoomObject\n\nThese methods are available after initializing Panzoom'
+  '## PanzoomObject\n\nThese methods are available after initializing Panzoom.'
 ).replace(/CurrentValues/g, '[CurrentValues](#CurrentValues)')
 
 data += getInterfaceContent('types.currentvalues.md')

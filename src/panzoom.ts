@@ -4,12 +4,12 @@
  *
  * Copyright Timmy Willison and other contributors
  * Released under the MIT license
- * https://github.com/timmywil/panzoom/blob/master/MIT-License.txt
+ * https://github.com/timmywil/panzoom/blob/main/MIT-License.txt
  *
  */
 import './polyfills'
 
-import {
+import type {
   PanOptions,
   PanzoomEvent,
   PanzoomEventDetail,
@@ -128,26 +128,18 @@ function Panzoom(
       parent.style.touchAction = opts.touchAction
       elem.style.touchAction = opts.touchAction
     }
-    if (
-      opts.hasOwnProperty('minScale') ||
-      opts.hasOwnProperty('maxScale') ||
-      opts.hasOwnProperty('contain')
-    ) {
-      setMinMax()
-    }
   }
 
   let x = 0
   let y = 0
   let scale = 1
   let isPanning = false
-  zoom(options.startScale, { animate: false })
+  zoom(options.startScale, { animate: false, force: true })
   // Wait for scale to update
   // for accurate dimensions
   // to constrain initial values
   setTimeout(() => {
-    setMinMax()
-    pan(options.startX, options.startY, { animate: false })
+    pan(options.startX, options.startY, { animate: false, force: true })
   })
 
   function trigger(eventName: PanzoomEvent, detail: PanzoomEventDetail, opts: PanzoomOptions) {
@@ -173,29 +165,10 @@ function Panzoom(
         }
       }
       opts.setTransform(elem, value, opts)
+      trigger(eventName, value, opts)
+      trigger('panzoomchange', value, opts)
     })
-    trigger(eventName, value, opts)
-    trigger('panzoomchange', value, opts)
     return value
-  }
-
-  function setMinMax() {
-    if (options.contain) {
-      const dims = getDimensions(elem)
-      const parentWidth = dims.parent.width - dims.parent.border.left - dims.parent.border.right
-      const parentHeight = dims.parent.height - dims.parent.border.top - dims.parent.border.bottom
-      const elemWidth = dims.elem.width / scale
-      const elemHeight = dims.elem.height / scale
-      const elemScaledWidth = parentWidth / elemWidth
-      const elemScaledHeight = parentHeight / elemHeight
-      if (options.contain === 'inside') {
-        options.maxScale = Math.min(elemScaledWidth, elemScaledHeight)
-      } else if (options.contain === 'outside') {
-        options.minScale = Math.max(elemScaledWidth, elemScaledHeight)
-      } else if (options.contain === 'cover') {
-          options.minScale = Math.min(parentWidth / dims.elem.width, parentHeight / dims.elem.height)
-      }
-    }
   }
 
   function constrainXY(
@@ -220,33 +193,7 @@ function Panzoom(
       result.y = (opts.relative ? y : 0) + toY
     }
 
-    if (opts.contain === 'inside') {
-      const dims = getDimensions(elem)
-      result.x = Math.max(
-        -dims.elem.margin.left - dims.parent.padding.left,
-        Math.min(
-          dims.parent.width -
-            dims.elem.width / toScale -
-            dims.parent.padding.left -
-            dims.elem.margin.left -
-            dims.parent.border.left -
-            dims.parent.border.right,
-          result.x
-        )
-      )
-      result.y = Math.max(
-        -dims.elem.margin.top - dims.parent.padding.top,
-        Math.min(
-          dims.parent.height -
-            dims.elem.height / toScale -
-            dims.parent.padding.top -
-            dims.elem.margin.top -
-            dims.parent.border.top -
-            dims.parent.border.bottom,
-          result.y
-        )
-      )
-    } else if (opts.contain === 'outside') {
+    if (opts.contain) {
       const dims = getDimensions(elem)
       const realWidth = dims.elem.width / scale
       const realHeight = dims.elem.height / scale
@@ -254,24 +201,50 @@ function Panzoom(
       const scaledHeight = realHeight * toScale
       const diffHorizontal = (scaledWidth - realWidth) / 2
       const diffVertical = (scaledHeight - realHeight) / 2
-      const minX =
-        (-(scaledWidth - dims.parent.width) -
-          dims.parent.padding.left -
-          dims.parent.border.left -
-          dims.parent.border.right +
-          diffHorizontal) /
-        toScale
-      const maxX = (diffHorizontal - dims.parent.padding.left) / toScale
-      result.x = Math.max(Math.min(result.x, maxX), minX)
-      const minY =
-        (-(scaledHeight - dims.parent.height) -
-          dims.parent.padding.top -
-          dims.parent.border.top -
-          dims.parent.border.bottom +
-          diffVertical) /
-        toScale
-      const maxY = (diffVertical - dims.parent.padding.top) / toScale
-      result.y = Math.max(Math.min(result.y, maxY), minY)
+
+      if (opts.contain === 'inside') {
+        const minX = (-dims.elem.margin.left - dims.parent.padding.left + diffHorizontal) / toScale
+        const maxX =
+          (dims.parent.width -
+            scaledWidth -
+            dims.parent.padding.left -
+            dims.elem.margin.left -
+            dims.parent.border.left -
+            dims.parent.border.right +
+            diffHorizontal) /
+          toScale
+        result.x = Math.max(Math.min(result.x, maxX), minX)
+        const minY = (-dims.elem.margin.top - dims.parent.padding.top + diffVertical) / toScale
+        const maxY =
+          (dims.parent.height -
+            scaledHeight -
+            dims.parent.padding.top -
+            dims.elem.margin.top -
+            dims.parent.border.top -
+            dims.parent.border.bottom +
+            diffVertical) /
+          toScale
+        result.y = Math.max(Math.min(result.y, maxY), minY)
+      } else if (opts.contain === 'outside') {
+        const minX =
+          (-(scaledWidth - dims.parent.width) -
+            dims.parent.padding.left -
+            dims.parent.border.left -
+            dims.parent.border.right +
+            diffHorizontal) /
+          toScale
+        const maxX = (diffHorizontal - dims.parent.padding.left) / toScale
+        result.x = Math.max(Math.min(result.x, maxX), minX)
+        const minY =
+          (-(scaledHeight - dims.parent.height) -
+            dims.parent.padding.top -
+            dims.parent.border.top -
+            dims.parent.border.bottom +
+            diffVertical) /
+          toScale
+        const maxY = (diffVertical - dims.parent.padding.top) / toScale
+        result.y = Math.max(Math.min(result.y, maxY), minY)
+        }
     } else if (opts.contain === 'cover') {
         const dims = getDimensions(elem)
         const realWidth = dims.elem.width / scale
@@ -288,30 +261,37 @@ function Panzoom(
         else {
             const minX =
                 (-(scaledWidth - dims.parent.width) -
-                    dims.parent.padding.left -
-                    dims.parent.border.left -
-                    dims.parent.border.right +
-                    diffHorizontal) /
-                toScale
+                        dims.parent.padding.left -
+                        dims.parent.border.left -
+                        dims.parent.border.right +
+                        diffHorizontal) /
+                    toScale
             const maxX = (diffHorizontal - dims.parent.padding.left) / toScale
             result.x = Math.max(Math.min(result.x, maxX), minX)
         }
 
         if (scaledHeight < dims.parent.height) {
-            result.y = (diffVertical - dims.parent.padding.top) / toScale
+            result.y = (dims.parent.height / 2 - scaledHeight / 2 - dims.parent.padding.top - dims.parent.border.top + diffVertical) /
+                toScale;
         }
         else {
             const minY =
                 (-(scaledHeight - dims.parent.height) -
-                    dims.parent.padding.top -
-                    dims.parent.border.top -
-                    dims.parent.border.bottom +
-                    diffVertical) /
-                toScale
+                        dims.parent.padding.top -
+                        dims.parent.border.top -
+                        dims.parent.border.bottom +
+                        diffVertical) /
+                    toScale
             const maxY = (diffVertical - dims.parent.padding.top) / toScale
             result.y = Math.max(Math.min(result.y, maxY), minY)
         }
     }
+
+    if (opts.roundPixels) {
+      result.x = Math.round(result.x)
+      result.y = Math.round(result.y)
+    }
+
     return result
   }
 
@@ -321,7 +301,30 @@ function Panzoom(
     if (!opts.force && opts.disableZoom) {
       return result
     }
-    result.scale = Math.min(Math.max(toScale, opts.minScale), opts.maxScale)
+
+    let minScale = options.minScale
+    let maxScale = options.maxScale
+
+    if (opts.contain) {
+      const dims = getDimensions(elem)
+      const elemWidth = dims.elem.width / scale
+      const elemHeight = dims.elem.height / scale
+      if (elemWidth > 1 && elemHeight > 1) {
+          const parentWidth = dims.parent.width - dims.parent.border.left - dims.parent.border.right
+          const parentHeight = dims.parent.height - dims.parent.border.top - dims.parent.border.bottom
+          const elemScaledWidth = parentWidth / elemWidth
+          const elemScaledHeight = parentHeight / elemHeight
+          if (options.contain === 'inside') {
+              maxScale = Math.min(maxScale, elemScaledWidth, elemScaledHeight)
+          } else if (options.contain === 'outside') {
+              minScale = Math.max(minScale, elemScaledWidth, elemScaledHeight)
+          } else if (options.contain === 'cover') {
+              minScale = Math.min(parentWidth / dims.elem.width, parentHeight / dims.elem.height)
+          }
+      }
+    }
+
+    result.scale = Math.min(Math.max(toScale, minScale), maxScale)
     return result
   }
 
@@ -332,12 +335,14 @@ function Panzoom(
     originalEvent?: PanzoomEventDetail['originalEvent']
   ) {
     const result = constrainXY(toX, toY, scale, panOptions)
-    const opts = result.opts
 
-    x = result.x
-    y = result.y
-
-    return setTransformWithEvent('panzoompan', opts, originalEvent)
+    // Only try to set if the result is somehow different
+    if (x !== result.x || y !== result.y) {
+      x = result.x
+      y = result.y
+      return setTransformWithEvent('panzoompan', result.opts, originalEvent)
+    }
+    return { x, y, scale, isSVG, originalEvent }
   }
 
   function zoom(
@@ -439,7 +444,7 @@ function Panzoom(
       y: (clientY / effectiveArea.height) * (effectiveArea.height * toScale)
     }
 
-    return zoom(toScale, { animate: false, ...zoomOptions, focal }, originalEvent)
+    return zoom(toScale, { ...zoomOptions, animate: false, focal }, originalEvent)
   }
 
   function zoomWithWheel(event: WheelEvent, zoomOptions?: ZoomOptions) {
@@ -447,14 +452,14 @@ function Panzoom(
     // or it conflicts with regular page scroll
     event.preventDefault()
 
-    const opts = { ...options, ...zoomOptions }
+    const opts = { ...options, ...zoomOptions, animate: false }
 
     // Normalize to deltaX in case shift modifier is used on Mac
     const delta = event.deltaY === 0 && event.deltaX ? event.deltaX : event.deltaY
     const wheel = delta < 0 ? 1 : -1
     const toScale = constrainScale(scale * Math.exp((wheel * opts.step) / 3), opts).scale
 
-    return zoomToPoint(toScale, event, opts)
+    return zoomToPoint(toScale, event, opts, event)
   }
 
   function reset(resetOptions?: PanzoomOptions) {
@@ -509,21 +514,31 @@ function Panzoom(
     addPointer(pointers, event)
     const current = getMiddle(pointers)
     if (pointers.length > 1) {
+      // A startDistance of 0 means
+      // that there weren't 2 pointers
+      // handled on start
+      if (startDistance === 0) {
+        startDistance = getDistance(pointers)
+      }
       // Use the distance between the first 2 pointers
       // to determine the current scale
       const diff = getDistance(pointers) - startDistance
       const toScale = constrainScale((diff * options.step) / 80 + startScale).scale
-      zoomToPoint(toScale, current)
+      zoomToPoint(toScale, current, { animate: false }, event)
+    } else {
+      // Panning during pinch zoom can cause issues
+      // because the zoom has not always rendered in time
+      // for accurate calculations
+      // See https://github.com/timmywil/panzoom/issues/512
+      pan(
+        origX + (current.clientX - startClientX) / scale,
+        origY + (current.clientY - startClientY) / scale,
+        {
+          animate: false
+        },
+        event
+      )
     }
-
-    pan(
-      origX + (current.clientX - startClientX) / scale,
-      origY + (current.clientY - startClientY) / scale,
-      {
-        animate: false
-      },
-      event
-    )
   }
 
   function handleUp(event: PointerEvent) {

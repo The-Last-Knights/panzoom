@@ -1,9 +1,9 @@
 {
-  "exclude": ["dist"],
   "compilerOptions": {
     "alwaysStrict": true,
     "esModuleInterop": true,
     "jsx": "react",
+    "lib": ["dom", "es2017"],
     "module": "esnext",
     "moduleResolution": "node",
     "noImplicitAny": true,
@@ -13,5 +13,7 @@
     "strict": true,
     "strictNullChecks": false,
     "target": "es5"
-  }
+  },
+  "exclude": ["node_modules", ".yarn", ".pnp.cjs", ".pnp.loader.mjs", "dist"],
+  "include": ["**/*.js", "**/*.mjs", "**/*.cjs", "**/*.ts", "**/*.tsx"]
 }

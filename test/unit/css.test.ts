@@ -1,5 +1,6 @@
-import { strict as assert } from 'assert'
 import { setStyle, setTransform } from '../../src/css'
+
+import { strict as assert } from 'assert'
 
 function assertStyle(elem: HTMLElement | SVGElement, name: string, value: string) {
   const capName = name[0].toUpperCase() + name.slice(1)

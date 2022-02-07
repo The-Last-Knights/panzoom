@@ -8,7 +8,7 @@ module.exports = function (config) {
     },
     karmaTypescriptConfig: {
       tsconfig: './tsconfig.json',
-      exclude: ['node_modules', 'demo'],
+      exclude: ['node_modules', '.yarn', '.pnp.cjs', '.pnp.loader.mjs', 'demo'],
       compilerOptions: {
         module: 'commonjs'
       }
@@ -18,6 +18,7 @@ module.exports = function (config) {
         opts: 'test/mocha.opts'
       }
     },
+    plugins: ['karma-mocha', 'karma-typescript', 'karma-firefox-launcher'],
     reporters: ['progress', 'karma-typescript'],
     port: 9876,
     colors: true,

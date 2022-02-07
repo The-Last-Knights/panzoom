@@ -110,21 +110,7 @@ export interface MiscOptions {
   /** The overflow CSS value for the parent. Defaults to 'hidden' */
   overflow?: string
   /**
-   * Override the transform setter.
-   * This is exposed mostly so the user could
-   * set other parts of a transform
-   * aside from scale and translate.
-   * Default is defined in src/css.ts.
-   *
-   * ```js
-   * // This example always sets a rotation
-   * // when setting the scale and translation
-   * const panzoom = Panzoom(elem, {
-   *   setTransform: (elem, { scale, x, y }) => {
-   *     panzoom.setStyle('transform', `rotate(0.5turn) scale(${scale}) translate(${x}px, ${y}px)`)
-   *   }
-   * })
-   * ```
+   * Set the transform using the proper prefix.
    */
   setTransform?: typeof setTransform
   /** Silence all events */
@@ -183,6 +169,15 @@ export interface PanOnlyOptions {
   relative?: boolean
   /** Disable panning while the scale is equal to the starting value */
   panOnlyWhenZoomed?: boolean
+  /**
+   * Round x and y values to whole numbers.
+   * This can help prevent images and text from looking blurry,
+   * but the higher the scale, the more it becomes
+   * necessary to use fractional pixels.
+   * Use your own judgment on how much to limit
+   * zooming in when using this option.
+   */
+  roundPixels?: boolean
 }
 
 export interface ZoomOnlyOptions {
@@ -220,6 +215,12 @@ export interface PanzoomObject {
    * This does not normally need to be called.
    * It gets called by default when creating a new Panzoom object,
    * but can be skipped with the `noBind` option.
+   *
+   * ```js
+   * const panzoom = Panzoom(elem, { noBind: true })
+   * // ...
+   * panzoom.bind()
+   * ```
    */
   bind: () => void
   /** Remove all event listeners bound to the the Panzoom element */
@@ -333,12 +334,16 @@ export interface PanzoomObject {
   /**
    * Zoom the Panzoom element to a focal point using the given WheelEvent
    *
-   *
    * This is a convenience function that may not handle all use cases.
    * Other cases should handroll solutions using the `zoomToPoint`
    * method or the `zoom` method's focal option.
    *
-   * **Note**: the focal point zooming pan adjustment is not affected by the `disablePan` option.
+   * **Notes**:
+   *
+   * - the focal point zooming pan adjustment is
+   *   not affected by the `disablePan` option.
+   * - animate should not be used when zooming with the wheel,
+   *   and is therefore always disabled.
    *
    * ```js
    * // Bind to mousewheel
